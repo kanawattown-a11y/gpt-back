@@ -40,18 +40,25 @@ app.post('/chat', async (req, res) => {
 
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo", 
-            messages: [{ role: "user", content: message }],
+            // --- *** التغيير هنا *** ---
+            // الترقية إلى موديل أحدث وأكثر ذكاءً
+            model: "gpt-4o-mini", 
+            
+            messages: [
+                // إضافة رسالة نظام لتشجيعه على استخدام Markdown
+                { role: "system", content: "You are a helpful assistant. Format your responses using Markdown when appropriate (e.g., for lists, bold text, code snippets)." },
+                { role: "user", content: message }
+            ],
         });
 
         res.json({ reply: completion.choices[0].message.content });
 
     } catch (error) {
         console.error('--- OpenAI API Error ---');
-        console.error(error); // هذا السطر سيطبع الخطأ الدقيق من OpenAI
+        console.error(error);
         console.error('------------------------');
         
-        res.status(500).json({ error: 'Failed to get a response from the AI service. Check server logs for details (likely a billing or API key issue).' });
+        res.status(500).json({ error: 'Failed to get a response from the AI service. Check server logs (this model may require a paid plan).' });
     }
 });
 
