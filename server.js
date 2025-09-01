@@ -13,7 +13,7 @@ const openai = new OpenAI({
 
 // إعدادات الأمان (CORS)
 // **مهم:** قم بتغيير الرابط إلى رابط GitHub Pages الخاص بك
-const allowedOrigins = ['https://your-github-username.github.io'];
+const allowedOrigins = ['https://kanawattown-a11y.github.io/gpt-front'];
 const corsOptions = {
     origin: function (origin, callback ) {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
