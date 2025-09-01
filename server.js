@@ -1,26 +1,23 @@
 const express = require('express');
 const cors = require('cors');
-const OpenAI = require('openai');
+// لاحظ أننا لم نعد نستخدم OpenAI مؤقتاً
+// const OpenAI = require('openai'); 
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// التحقق من وجود مفتاح API عند بدء التشغيل
-if (!process.env.OPENAI_API_KEY) {
-    console.error("FATAL ERROR: The OPENAI_API_KEY environment variable is not set on Render.");
-    process.exit(1);
-}
+// طباعة رسالة عند بدء التشغيل للتأكد من أن الخادم يعمل
+console.log("--- Server is starting up... ---");
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// طباعة قيمة متغير البيئة (للتشخيص فقط)
+// هذا سيظهر لنا ما إذا كان Render يقرأ المتغير بشكل صحيح أم لا
+console.log("Value of OPENAI_API_KEY found:", process.env.OPENAI_API_KEY ? "Key is present" : "!!! KEY IS MISSING !!!");
 
 // إعدادات الأمان (CORS)
 const allowedOrigins = [
     'https://kanawattown-a11y.github.io'
 ];
-
 const corsOptions = {
     origin: function (origin, callback ) {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -34,35 +31,26 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// نقطة النهاية (Endpoint) للشات
+// --- نقطة نهاية (Endpoint) تشخيصية ---
 app.post('/chat', async (req, res) => {
     const { message } = req.body;
 
+    // طباعة رسالة في السجلات عند وصول طلب
+    console.log(`Received a request on /chat with message: "${message}"`);
+
     if (!message) {
+        console.log("Request failed: Message was empty.");
         return res.status(400).json({ error: 'Message is required.' });
     }
 
-    try {
-        const completion = await openai.chat.completions.create({
-            // --- *** التغيير هنا *** ---
-            // تم التبديل إلى الموديل الأساسي لضمان التوافق
-            model: "gpt-3.5-turbo", 
-            
-            messages: [{ role: "user", content: message }],
-        });
-
-        res.json({ reply: completion.choices[0].message.content });
-
-    } catch (error) {
-        console.error('--- OpenAI API Error ---');
-        // هذا السجل مهم جداً، سيظهر لنا تفاصيل الخطأ من OpenAI
-        console.error(error); 
-        console.error('------------------------');
-        
-        res.status(500).json({ error: 'Failed to get a response from the AI service. The model might be unavailable or an API key issue persists.' });
-    }
+    // --- الرد التجريبي ---
+    // بدلاً من الاتصال بـ OpenAI، سنرسل رداً ثابتاً فوراً
+    const testReply = `This is a test response. Your original message was: "${message}". The server is working correctly.`;
+    
+    console.log("Sending a test response back to the user.");
+    res.json({ reply: testReply });
 });
 
 app.listen(port, () => {
-    console.log(`Server is running successfully on port ${port}`);
+    console.log(`--- Server has successfully started and is listening on port ${port} ---`);
 });
