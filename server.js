@@ -1,4 +1,5 @@
-const express = require('express');
+// في ملف server.js
+const express = require('express' );
 const cors = require('cors');
 const OpenAI = require('openai');
 require('dotenv').config();
@@ -6,16 +7,24 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// إعداد OpenAI
+// التحقق من وجود مفتاح API عند بدء التشغيل
+if (!process.env.OPENAI_API_KEY) {
+    console.error("FATAL ERROR: OPENAI_API_KEY is not defined.");
+    process.exit(1); // إيقاف الخادم إذا لم يكن المفتاح موجوداً
+}
+
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 // إعدادات الأمان (CORS)
-// **مهم:** قم بتغيير الرابط إلى رابط GitHub Pages الخاص بك
-const allowedOrigins = ['https://kanawattown-a11y.github.io/gpt-front'];
+const allowedOrigins = [
+    'https://kanawattown-a11y.github.io' // الرابط الخاص بك
+];
+
 const corsOptions = {
     origin: function (origin, callback ) {
+        // السماح بالطلبات التي لا تحمل origin (مثل Postman أو الاختبارات المحلية)
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
@@ -27,7 +36,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// نقطة النهاية (Endpoint) للشات
 app.post('/chat', async (req, res) => {
     const userMessage = req.body.message;
 
@@ -37,7 +45,6 @@ app.post('/chat', async (req, res) => {
 
     try {
         const completion = await openai.chat.completions.create({
-            // استخدم gpt-3.5-turbo لأنه الأسرع والأكثر فعالية من حيث التكلفة
             model: "gpt-3.5-turbo", 
             messages: [{ role: "user", content: userMessage }],
         });
